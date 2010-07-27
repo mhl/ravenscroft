@@ -19,6 +19,14 @@ import PyRSS2Gen
 
 download_directory = "downloaded"
 
+podcast_title = "Tom Ravenscroft on BBC Radio 6"
+podcast_description = "An unofficial podcast for Tom Ravenscroft's show on BBC Radio 6, which annoyingly is only available through iPlayer"
+show_url = "http://www.bbc.co.uk/programmes/b00slvl3"
+def episode_description(f):
+    # Could examine the file's ID3 tags or extract the date
+    # from the filename to make this more interesting
+    return "An episode of Tom Ravenscroft's show on BBC Radio 6"
+
 number_to_keep = None
 base_podcast_url = None
 
@@ -46,8 +54,6 @@ for f in files[0:-number_to_keep]:
     os.remove(f)
 
 opener = urllib2.build_opener()
-
-show_url = "http://www.bbc.co.uk/programmes/b00slvl3"
 
 soup = BeautifulSoup(opener.open(show_url))
 
@@ -84,20 +90,21 @@ for f in files:
 def item_from_file(f):
     full = os.path.join(download_directory,f)
     extension_removed = re.sub('\.mp3$','',f,re.I)
+    url_for_mp3 = base_podcast_url + urllib2.quote(f)
     return PyRSS2Gen.RSSItem(
         title = extension_removed,
         link = show_url,
-        description = "An episode of Tom Ravenscroft's show on BBC Radio 6",
-        guid = PyRSS2Gen.Guid(f),
+        description = episode_description(f),
+        guid = PyRSS2Gen.Guid(url_for_mp3),
         pubDate = mtime(full),
-        enclosure = PyRSS2Gen.Enclosure(base_podcast_url + urllib2.quote(f),
+        enclosure = PyRSS2Gen.Enclosure(url_for_mp3,
                                         os.path.getsize(full),
                                         "audio/mpeg"))
 
 rss = PyRSS2Gen.RSS2(
-    title = "Tom Ravenscroft on BBC Radio 6",
+    title = podcast_title,
     link = show_url,
-    description = "An unofficial podcast for Tom Ravenscroft's show on BBC Radio 6, which annoyingly is only available through iPlayer",
+    description = podcast_description,
     lastBuildDate = datetime.datetime.now(),
     items = [ item_from_file(f) for f in files ] )
 
