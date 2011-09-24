@@ -56,6 +56,8 @@ for f in files[0:-number_to_keep]:
 opener = urllib2.build_opener()
 
 soup = BeautifulSoup(opener.open(show_url))
+if not soup:
+    raise Exception, "Parsing "+show_url+" with BeautifulSoup failed"
 
 def iplayer_console_tag(x):
     if x.name != 'a':
@@ -67,6 +69,8 @@ def iplayer_console_tag(x):
     return False
 
 a = soup.find( iplayer_console_tag )
+if not a:
+    raise Exception, "Couldn't find the iplayer console tag in "+show_url
 
 check_call(["mkdir","-p",download_directory])
 
