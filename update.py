@@ -4,7 +4,7 @@ import sys
 import os
 import stat
 import urllib2
-import datetime
+from datetime import datetime
 import re
 import time
 from subprocess import check_call
@@ -46,7 +46,7 @@ def is_mp3(f):
 files = [ os.path.join(download_directory,x) for x in os.listdir(download_directory) if is_mp3(x) ]
 
 def mtime(f):
-    return datetime.datetime.fromtimestamp(os.stat(f)[stat.ST_MTIME])
+    return datetime.fromtimestamp(os.stat(f)[stat.ST_MTIME])
 
 files.sort( key = mtime )
 
@@ -109,7 +109,7 @@ rss = PyRSS2Gen.RSS2(
     title = podcast_title,
     link = show_url,
     description = podcast_description,
-    lastBuildDate = datetime.datetime.now(),
+    lastBuildDate = datetime.now(),
     items = [ item_from_file(f) for f in files ] )
 
 output_filename = os.path.join(download_directory,"podcast.xml")
