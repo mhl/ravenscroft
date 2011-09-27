@@ -1,6 +1,3 @@
-[submodule "iplayer-dl"]
-	path = iplayer-dl
-	url = http://github.com/threedaymonk/iplayer-dl.git
 [submodule "get_iplayer"]
 	path = get_iplayer
 	url = git://git.infradead.org/get_iplayer.git
