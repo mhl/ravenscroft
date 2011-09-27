@@ -8,6 +8,15 @@ from datetime import datetime
 import re
 import time
 from subprocess import check_call
+from tempfile import NamedTemporaryFile
+from optparse import OptionParser
+
+parser = OptionParser(usage="Usage: %prog [OPTIONS]")
+parser.add_option('--download',
+                  action="store_true",
+                  dest='download',
+                  default=False)
+options, args = parser.parse_args()
 
 file_mode = 0o644
 
@@ -32,10 +41,10 @@ number_to_keep = None
 base_podcast_url = None
 
 try:
-    if len(sys.argv) != 3:
+    if len(args) != 2:
         raise Exception, "Wrong number of arguments"
-    number_to_keep = int(sys.argv[1])
-    base_podcast_url = sys.argv[2]
+    number_to_keep = int(args[0])
+    base_podcast_url = args[1]
 except Exception as e:
     print >> sys.stderr, str(e)
     print >> sys.stderr, "Usage: %s <NUMBER-TO-KEEP> <BASE_PODCAST_URL>"
@@ -75,12 +84,27 @@ if not a:
 
 check_call(["mkdir","-p",download_directory])
 
-def iplayer_dl(url):
-    command = [ "ruby", "-I", "iplayer-dl/lib", "iplayer-dl/bin/iplayer-dl",
-                "-d", download_directory, url ]
-    check_call(command)
+if options.download:
+    check_call(["get_iplayer/get_iplayer", "--type=radio", "-o", download_directory])
 
-iplayer_dl(a['href'])
+wma_files = [os.path.join(download_directory,x) for x in os.listdir(download_directory) if x.endswith('.wma')]
+wma_files.sort(key=mtime)
+if wma_files:
+    wma_output = wma_files[-1]
+
+    try:
+        tmp_file = NamedTemporaryFile(dir=download_directory, delete=False)
+        check_call(["mplayer", "-quiet", "-vo", "null", "-vc", "dummy", "-ao", "pcm:waveheader:file="+tmp_file.name, wma_output])
+
+        mp3_file_leafname = datetime.now().strftime("ravenscroft-%Y-%M-%d-%H:%m:%S.mp3")
+        mp3_file = os.path.join(download_directory, mp3_file_leafname)
+
+        check_call(["lame", "--quiet", "-V", "4", tmp_file.name, mp3_file])
+        os.remove(wma_output)
+    finally:
+        os.remove(tmp_file.name)
+else:
+    print "Warning: no WMA file found to transcode, just regenerating podcast.xml"
 
 # Now generate the XML for the podcast:
 
