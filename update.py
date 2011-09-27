@@ -18,6 +18,7 @@ sys.path.append('PyRSS2Gen')
 import PyRSS2Gen
 
 download_directory = "downloaded"
+check_call(["mkdir", "-p", download_directory])
 
 podcast_title = "Tom Ravenscroft on BBC Radio 6"
 podcast_description = "An unofficial podcast for Tom Ravenscroft's show on BBC Radio 6, which annoyingly is only available through iPlayer"
